@@ -16,18 +16,18 @@ void connectWiFi(const char* ssid, const char* password)
   while (WiFi.status() != WL_CONNECTED)
   {
     retries++;
-    delay(200);
     Serial.print(".");
     // toggle status led
     if(digitalRead(D0) == HIGH) { digitalWrite(D0, LOW); }
     else { digitalWrite(D0, HIGH); }
-    
+    delay(200);
     if(retries > 20)
     {
       Serial.println("\nMaximum number of attempts reached. Restarting System...");
       ESP.restart();
     }
   }
+  digitalWrite(D0, HIGH);
 
   if(WiFi.status() == WL_CONNECTED)
   {
