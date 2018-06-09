@@ -1,4 +1,4 @@
-#include <config.h> // contains wifi-ssid and wifi-password
+#include "config.h" // contains wifi-ssid and wifi-password
 #include <ESP8266WiFi.h>
 
 const char* ssid = WIFI_SSID;
@@ -21,7 +21,6 @@ void setup()
 
 void loop() 
 {
-  
   
   
   checkWiFiStatus();
