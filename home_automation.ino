@@ -1,11 +1,18 @@
 #include "config.h" // contains wifi-ssid and wifi-password
-#include <ESP8266WiFi.h>
+#include "wifi-lib.h"
+//#include <ESP8266WiFi.h>
 
-const char* ssid = WIFI_SSID;
-const char* password = WIFI_PASSWORD;
+#include <stdio.h>
+#include <ESP8266WebServer.h>
+#include <ArduinoJson.h>
 
-int wifiStatus;
- 
+const char *ssid = WIFI_SSID;
+const char *password = WIFI_PASSWORD;
+
+//int wifiStatus;
+
+ESP8266WebServer http_rest_server(80);
+
 void setup() 
 {  
   Serial.begin(115200);\
@@ -13,68 +20,48 @@ void setup()
   
   Serial.println("\n\nProgram-Setup started.");
   Serial.println("Starting WiFi-Setup.");
-  connectWiFi();
+  connectWiFi(ssid, password);
+  
+  Serial.println("Configurate REST Server Routing.");
+  config_rest_server_routing();
 
+  Serial.println("Starting HTTP REST Server...");
+  http_rest_server.begin();
+  Serial.println("HTTP REST Server Started");
+
+  Serial.println("Setup Led on Pin D6.");
+  pinMode(D6, OUTPUT);
+  
   Serial.println("Program-Setup completed. Starting Main-Program.\n");
 }   
 
-
 void loop() 
 {
-  
-  
-  checkWiFiStatus();
-  delay(100);
+  http_rest_server.handleClient();
+  checkWiFiStatus(ssid, password);
+}
+
+void config_rest_server_routing()
+{
+  http_rest_server.on("/", HTTP_GET, []() {
+        http_rest_server.send(200, "text/html",
+            "Welcome to the ESP8266 REST Web Server");
+    });
+  http_rest_server.on("/toggleLed", HTTP_PUT, toggleLed);
 }
 
 
-void connectWiFi()
+void toggleLed()
 {
-  Serial.print("Connect to WiFi with SSID ");
-  Serial.println(ssid);
-  Serial.print("Connecting");
-  
-  WiFi.begin(ssid, password);
-
-  int counter = 0;
-  while (WiFi.status() != WL_CONNECTED)
+  Serial.println("Toggle Led triggered!");
+  if(digitalRead(D6) == HIGH)
   {
-    delay(500);
-    Serial.print(".");
-    counter = counter + 1;
-    if(counter > 10) {
-      Serial.println("\nMaximum number of attempts reached. Restarting System...");
-      ESP.restart();
-    }
-  }
-
-  wifiStatus = WiFi.status();
-
-  if(wifiStatus == WL_CONNECTED)
-  {
-     Serial.println("\nWiFi-Connection established!");  
-     Serial.print("Local IP address is: ");
-     Serial.println(WiFi.localIP());
-  }
-  else{
-    Serial.println("\nEstablishing connection failed!");
-  }
-}
-
-void checkWiFiStatus()
-{
-  wifiStatus = WiFi.status();
-
-  if(wifiStatus != WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.println("WiFi-connection interrupted.");
-    Serial.println("Initiate reconnect to WiFi.");
-    connectWiFi();
+    digitalWrite(D6, LOW);
   }
   else
   {
-    //Serial.println("WiFi-status OK.");
+    digitalWrite(D6, HIGH);
   }
+  http_rest_server.send(200);
 }
 
