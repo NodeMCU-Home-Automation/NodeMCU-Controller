@@ -6,5 +6,6 @@ Change the SSID and PASSWORD to your local WiFi-Settings.
 
 "
 #define WIFI_SSID "SSID"
+
 #define WIFI_PASSWORD "PASSWORD"
 "
