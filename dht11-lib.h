@@ -26,11 +26,6 @@ class DHT11Manager
       //Serial.println(String(DHT.getTemperature(), 0));
     }
 
-    void readValues()
-    {
-      TempAndHumidity lastValues = DHT.getTempAndHumidity();
-    }
-
     float getHumidity()
     {
       return DHT.getHumidity();
@@ -39,6 +34,18 @@ class DHT11Manager
     float getTemperature()
     {
       return DHT.getTemperature();
+    }
+
+    boolean isStatusOk()
+    {
+      if(DHT.getStatus() == DHT.ERROR_NONE)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
     }
 };
 

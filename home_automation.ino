@@ -56,16 +56,26 @@ void config_rest_server_routing()
             "Welcome to the ESP8266 REST Web Server");
     });
   http_rest_server.on("/toggleLed", HTTP_PUT, toggleLed);
-  http_rest_server.on("/temperature", HTTP_GET, []()
+  http_rest_server.on("/climate", HTTP_GET, get_climate);
+}
+
+void get_climate()
+{
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& jsonObj = jsonBuffer.createObject();
+  char JSONmessageBuffer[200];
+  
+  if(dht11Manager.isStatusOk())
   {
-    http_rest_server.send(200, "text/html", 
-    String(dht11Manager.getTemperature(), 4));
-  });
-  http_rest_server.on("/humidity", HTTP_GET, []()
+    jsonObj["temperature"] = dht11Manager.getTemperature();
+    jsonObj["humidity"] = dht11Manager.getHumidity();
+    jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
+    http_rest_server.send(200, "application/json", JSONmessageBuffer);
+  }
+  else
   {
-    http_rest_server.send(200, "text/html", 
-    String(dht11Manager.getHumidity(), 4));
-  });
+    http_rest_server.send(204);
+  }
 }
 
 void toggleLed()
